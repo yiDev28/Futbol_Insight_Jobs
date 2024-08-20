@@ -17,4 +17,9 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\EncryptorService\EncryptorService.csproj" />
+    <ProjectReference Include="..\..\LogServiceYiDev\LogServiceYiDev.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -1,65 +1,65 @@
-﻿﻿using Microsoft.AspNetCore.Http;
-
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
+﻿using EncryptorService.Services;
 using Futbol_Insight_Jobs.Models;
-using Futbol_Insight_Jobs.Tools.Token;
 using Futbol_Insight_Jobs.Models.DTO;
 using Futbol_Insight_Jobs.Services.Access;
+using LogServiceYiDev.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 
 namespace Futbol_Insight_Jobs.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/[controller]")]
     [AllowAnonymous]
     [ApiController]
     public class AccessController : ControllerBase
     {
-       private readonly Utilities _utilidades;
         private readonly IAccess _access;
-        public AccessController(Utilities utilidades, IAccess access)
+        public AccessController(IEncryptionService encryptionService, IAccess access)
         {
-            _utilidades = utilidades;
             _access = access;
         }
 
         [HttpPost]
-        [Route("Registrarse")]
-        public async Task<IActionResult> Registrarse(UserDTO objeto)
+        [Route("Register")]
+        public async Task<IActionResult> Registrarse(UserDTO user)
         {
-            //validar campo
-
-            ////////////
-            ///
-
-            var modeloUsuario = new UserModel
+            ResultModel<string> result = new ResultModel<string>();
+            try
             {
-                UsrTelefono ="311123456",
-                UsrCorreo="yidev28@gmail.com",
-                UsrNomUsuario = objeto.User,
-                UsrContrasena = _utilidades.encriptarSHA256(objeto.Pass),
-                UsrUsuario="yiduard.bolivar.admin"
-            };
+                var r = await _access.RegistrarUsuario(user);
 
-            _access.RegistrarUsuario(modeloUsuario);
-            return Ok();
+                result = r;
+
+            }
+            catch (Exception ex)
+            {
+
+                result.Code = 5500;
+                result.Message = ErrorDictionary.Errors.FirstOrDefault(e => e.ErrorCode == 5500).Description;
+                result.Details = ex.Message;
+            }
+            return Ok(result);
         }
 
-        //[HttpPost]
-        //[Route("Login")]
-        //public async Task<IActionResult> Login(UserDTO objeto)
-        //{
-        //    var usuarioEncontrado = await _dbPruebaContext.Usuarios
-        //                                            .Where(u =>
-        //                                                u.Correo == objeto.Correo &&
-        //                                                u.Clave == _utilidades.encriptarSHA256(objeto.Clave)
-        //                                              ).FirstOrDefaultAsync();
+        [HttpPost]
+        [Route("Signin")]
+        public async Task<IActionResult> Login(UserDTO user)
+        {
+            ResultModel<CredentialsUser> result = new ResultModel<CredentialsUser>();
+            try
+            {
+                var r = await _access.IniciarSesion(user);
+                result = r;
+            }
+            catch (Exception ex)
+            {
 
-        //    if (usuarioEncontrado == null)
-        //        return StatusCode(StatusCodes.Status200OK, new { isSuccess = false, token = "" });
-        //    else
-        //        return StatusCode(StatusCodes.Status200OK, new { isSuccess = true, token = _utilidades.generarJWT(usuarioEncontrado) });
-        //}
+                result.Code = 5500;
+                result.Message = ErrorDictionary.Errors.FirstOrDefault(e => e.ErrorCode == 5500).Description;
+                result.Details = ex.Message;
+            }
+            return Ok(result);
+        }
     }
 }
