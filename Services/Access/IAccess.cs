@@ -6,6 +6,7 @@ namespace Futbol_Insight_Jobs.Services.Access
 {
     public interface IAccess
     {
-        Task<ResultModel<bool>> RegistrarUsuario(UserModel user);
+        Task<ResultModel<string>> RegistrarUsuario(UserDTO user);
+        Task<ResultModel<CredentialsUser>> IniciarSesion(UserDTO user);
     }
 }

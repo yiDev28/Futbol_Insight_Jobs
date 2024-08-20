@@ -1,21 +1,23 @@
-﻿namespace Futbol_Insight_Jobs.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Futbol_Insight_Jobs.Models
 {
     public class UserModel
     {
-        public string UsrNomUsuario { get; set; }
-        public string UsrCorreo { get; set; }
-        public string UsrContrasena { get; set; }
-        public string UsrTelefono { get; set; }
-        public string UsrTipoUsuario { get; set; }
-        public string UsrEstado { get; set; }
-        public string UsrUsuario { get; set; }
-        public DateTime UsrFecCreacion { get; set; } = DateTime.Now;
-        public DateTime UsrFecRegistro { get; set; } = DateTime.Now;
+        [Key]
+        public int usr_id_int { get; set; }
+        public string usr_nom_usuario { get; set; }
+        public string usr_contrasena { get; set; }
+        public int usr_tipo_usuario { get; set; }
+        public string? usr_ult_token { get; set; }
+        public int usr_estado { get; set; } = 0;
+        public int usr_usuario { get; set; }
+        public DateTime usr_fec_creacion { get; set; } = DateTime.Now;
+        public DateTime usr_fec_registro { get; set; } = DateTime.Now;
+    }  
 
-        // Ejemplo de lógica de negocio dentro del modelo
-        public bool IsActive()
-        {
-            return UsrEstado == "Activo";
-        }
+    public class CredentialsUser
+    {
+        public string Token { get; set; }
     }
 }
