@@ -33,7 +33,7 @@ namespace Futbol_Insight_Jobs.Tools
             //crear detalle del token
             var jwtConfig = new JwtSecurityToken(
                 claims: userClaims,
-                expires: DateTime.UtcNow.AddMinutes(5),
+                expires: DateTime.UtcNow.AddMinutes(3600),
                 signingCredentials: credentials
                 );
 

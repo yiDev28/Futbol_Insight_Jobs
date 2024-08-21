@@ -4,6 +4,6 @@ namespace Futbol_Insight_Jobs.Services.Country
 {
     public interface ICountry
     {
-        Task<bool> SyncCountries(List<CountryModel> country);
+        Task<ResultModel<bool>> SyncCountries(List<CountryModel> country);
     }
 }

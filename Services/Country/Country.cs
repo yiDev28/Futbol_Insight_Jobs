@@ -1,5 +1,7 @@
 ﻿using Futbol_Insight_Jobs.Data;
 using Futbol_Insight_Jobs.Models;
+using Futbol_Insight_Jobs.Tools;
+using LogServiceYiDev.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Futbol_Insight_Jobs.Services.Country
@@ -7,16 +9,18 @@ namespace Futbol_Insight_Jobs.Services.Country
     public class Country : ICountry
     {
         private readonly DataContext _context;
+      
 
         public Country(DataContext context)
         {
             _context = context;
         }
 
-        public async Task<bool> SyncCountries(List<CountryModel> countries)
-        {
+        public async Task<ResultModel<bool>> SyncCountries(List<CountryModel> countries)
+        {        
             try
             {
+                ResultModel<bool> result = new ResultModel<bool>();
                 // Obtener las claves de los países que estamos insertando
                 var keys = countries.Select(c => c.cou_key).ToList();
 
@@ -77,14 +81,19 @@ namespace Futbol_Insight_Jobs.Services.Country
 
                 // Guardar los cambios
                 var r = await _context.SaveChangesAsync();
-                return true;
+
+                result.Code = 5200;
+                result.Message = ErrorDictionary.Errors.FirstOrDefault(e => e.ErrorCode == 5200).UserMessage;
+                result.Data = true;
+
+                return result;
+
             }
             catch (Exception ex)
             {
-                // Registrar el error para depuración
-                // _logger.LogError(ex, "Error syncing countries");
-                throw new Exception("Error syncing countries", ex);
+                throw ex;
             }
+            
         }
 
     }
