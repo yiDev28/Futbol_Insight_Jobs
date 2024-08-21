@@ -2,6 +2,7 @@
 using Futbol_Insight_Jobs.Models;
 using Futbol_Insight_Jobs.Models.DTO;
 using Futbol_Insight_Jobs.Services.Access;
+using Futbol_Insight_Jobs.Tools;
 using LogServiceYiDev.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,14 +11,15 @@ using Microsoft.AspNetCore.Mvc;
 namespace Futbol_Insight_Jobs.Controllers
 {
     [Route("api/v1/[controller]")]
-    [AllowAnonymous]
     [ApiController]
     public class AccessController : ControllerBase
     {
         private readonly IAccess _access;
-        public AccessController(IEncryptionService encryptionService, IAccess access)
+        private readonly Utilities _utilities;
+        public AccessController(IEncryptionService encryptionService, IAccess access, Utilities utilities)
         {
             _access = access;
+            _utilities = utilities;
         }
 
         [HttpPost]
@@ -35,9 +37,10 @@ namespace Futbol_Insight_Jobs.Controllers
             catch (Exception ex)
             {
 
-                result.Code = 5500;
-                result.Message = ErrorDictionary.Errors.FirstOrDefault(e => e.ErrorCode == 5500).Description;
-                result.Details = ex.Message;
+                var resultError = _utilities.HandleException(ex);
+                result.Code = resultError.Code;
+                result.Message = resultError.Message;
+                result.Details = resultError.Details;
             }
             return Ok(result);
         }
@@ -55,9 +58,10 @@ namespace Futbol_Insight_Jobs.Controllers
             catch (Exception ex)
             {
 
-                result.Code = 5500;
-                result.Message = ErrorDictionary.Errors.FirstOrDefault(e => e.ErrorCode == 5500).Description;
-                result.Details = ex.Message;
+                var resultError = _utilities.HandleException(ex);
+                result.Code = resultError.Code;
+                result.Message = resultError.Message;
+                result.Details = resultError.Details;
             }
             return Ok(result);
         }

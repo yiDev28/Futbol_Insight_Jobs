@@ -2,34 +2,45 @@
 using Futbol_Insight_Jobs.Models;
 using Futbol_Insight_Jobs.Services.ApiService;
 using Futbol_Insight_Jobs.Services.Country;
+using Futbol_Insight_Jobs.Tools;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Futbol_Insight_Jobs.Controllers
 {
-    [Route("api/[controller]")]
+    [Authorize]
+    [Route("api/v1/[controller]")]
     [ApiController]
     public class CountryController : ControllerBase
     {
         private readonly ICountry _countryService;
         private readonly IApiService _apiService;
+        private readonly Utilities _utilities;
 
 
-        public CountryController(ICountry countryService, IApiService apiService)
+        public CountryController(ICountry countryService, IApiService apiService, Utilities utilities)
         {
             _countryService = countryService;
             _apiService = apiService;
+            _utilities = utilities;
         }
         #region Sincronizar Paises
         [HttpGet]
-        [Route("/Refresh")]
+        [Route("Refresh")]
         public async Task<IActionResult> RefrescarPaises()
         {
+            ResultModel<bool> result = new ResultModel<bool>();
             try
             {
-                List<ApiCountry> _apiCountries = await _apiService.GetCountries();
+                var _apiCountries = await _apiService.GetCountries();
+
+                if (_apiCountries.Code != 5200)
+                {
+                    return Ok(_apiCountries);
+                }
 
                 List<CountryModel> countries = [];
-                foreach (var item in _apiCountries)
+                foreach (var item in _apiCountries.Data)
                 {
                     CountryModel country = new()
                     {
@@ -42,12 +53,18 @@ namespace Futbol_Insight_Jobs.Controllers
                     countries.Add(country);
                 }
                 var _dbCountries = await _countryService.SyncCountries(countries);
-            }
-            catch
-            {
+
+                return Ok(_dbCountries);
 
             }
-            return Ok();
+            catch (Exception ex)
+            {
+                var resultError = _utilities.HandleException(ex);
+                result.Code = resultError.Code;
+                result.Message = resultError.Message;
+                result.Details = resultError.Details;
+            }
+            return Ok(result);
         }
         #endregion
     }
