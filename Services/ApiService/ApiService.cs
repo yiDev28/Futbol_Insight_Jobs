@@ -1,5 +1,8 @@
 ﻿using Futbol_Insight_Jobs.Data;
 using Futbol_Insight_Jobs.Models;
+using Futbol_Insight_Jobs.Tools;
+using LogServiceYiDev.Models;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Web;
 
@@ -14,8 +17,9 @@ namespace Futbol_Insight_Jobs.Services.ApiService
             _apiContext = apiContext;
         }
 
-        public async Task<List<ApiCountry>> GetCountries()
+        public async Task<ResultModel<List<ApiCountry>>> GetCountries()
         {
+            ResultModel<List<ApiCountry>> result = new ResultModel<List<ApiCountry>>();
             try
             {
                 var _res = await _apiContext.GetApiAllSport("Countries");
@@ -23,17 +27,20 @@ namespace Futbol_Insight_Jobs.Services.ApiService
                 var responseBody = await _res.Content.ReadAsStringAsync();
                 var apiResponse = JsonSerializer.Deserialize<ApiCountryResponse>(responseBody);
 
-                if (apiResponse.success != 1 )
+                if (apiResponse.success != 1)
                 {
-                    throw new Exception("error en la respuesta del api");
+                    throw new Exception("Error en la respuesta del api - Countries");
                 }
-                return apiResponse.result;
-            }
-            catch (Exception)
-            {
+                result.Code = 5200;
+                result.Message = ErrorDictionary.Errors.FirstOrDefault(e => e.ErrorCode == 5200).UserMessage;
+                result.Data = apiResponse.result;
 
-                throw;
             }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return result;
 
         }
     }

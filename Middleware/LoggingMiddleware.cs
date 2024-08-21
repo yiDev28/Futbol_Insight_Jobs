@@ -50,12 +50,10 @@ public class LoggingMiddleware
         using (var responseBody = new MemoryStream())
         {
             context.Response.Body = responseBody;
-
             try
             {
                 // Continuar con la solicitud
                 await _next(context);
-
                 // Obtener y procesar la respuesta
                 var res = await FormatResponse(context.Response);
                 using (JsonDocument document = JsonDocument.Parse(res))

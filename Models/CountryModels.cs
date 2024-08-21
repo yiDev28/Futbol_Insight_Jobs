@@ -14,8 +14,8 @@ namespace Futbol_Insight_Jobs.Models
         public string cou_name { get; set; }
         public string? cou_iso2 { get; set; }
         public string? cou_logo { get; set; }
-        public string cou_estado { get; set; } = "ACT";
-        public string cou_usuario { get; set; } = "systemJobs";
+        public int cou_estado { get; set; } = 0;
+        public int cou_usuario { get; set; } = 9999;
         public DateTime? cou_fec_creacion { get; set; } 
         public DateTime cou_fec_registro { get; set; } = DateTime.Now;
     }

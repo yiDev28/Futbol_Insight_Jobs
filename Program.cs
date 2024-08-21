@@ -10,8 +10,10 @@ using LogServiceYiDev.Interfaces;
 using LogServiceYiDev.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,19 +48,53 @@ builder.Services.AddAuthentication(config =>
 {
     config.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     config.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(config =>
+ }).AddJwtBearer(config =>
 {
     config.RequireHttpsMetadata = false;
     config.SaveToken = true;
     config.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
-        ValidateIssuer = true,
-        ValidateAudience = true,
+        ValidateIssuer = false,
+        ValidateAudience = false,
         ValidateLifetime = true,
         ClockSkew = TimeSpan.Zero,
-        IssuerSigningKey = new SymmetricSecurityKey
-        (Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+    };
+
+    config.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            // Reemplaza 'Authorization' con 'apitoken'
+            var token = context.Request.Headers["ApiTokenJob"].FirstOrDefault();
+            if (!string.IsNullOrEmpty(token))
+            {
+                context.Token = token;
+            }
+            else
+            {
+                context.NoResult();
+            }
+            return Task.CompletedTask;
+        },
+        OnChallenge = context =>
+        {
+            // Evita la respuesta automática
+            context.HandleResponse();
+
+            // Personaliza la respuesta con un JSON
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            context.Response.ContentType = "application/json";
+            var result = JsonSerializer.Serialize(new
+            {
+                code = 401,
+                message = "You are not authorized to access this resource",
+                details = "Unauthorized",
+                data = false
+            });
+            return context.Response.WriteAsync(result);
+        }
     };
 });
 
@@ -89,6 +125,8 @@ app.UseCors("NewPolicy");
 app.UseRouting();
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

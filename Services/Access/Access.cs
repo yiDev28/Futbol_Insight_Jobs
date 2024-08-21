@@ -56,10 +56,7 @@ namespace Futbol_Insight_Jobs.Services.Access
             }
             catch (Exception ex)
             {
-                var resultError = _utilities.HandleException(ex);
-                result.Code = resultError.Code;
-                result.Message = resultError.Message;
-                result.Details = resultError.Details;
+                throw ex;
             }
 
             return result;
@@ -82,10 +79,7 @@ namespace Futbol_Insight_Jobs.Services.Access
             }
             catch (Exception ex)
             {
-                var resultError = _utilities.HandleException(ex);
-                result.Code = resultError.Code;
-                result.Message = resultError.Message;
-                result.Details = resultError.Details;
+                throw ex;
             }
             return result;
         }
